@@ -1,4 +1,3 @@
-import "./styles.css";
 import React from "react";
 export default function Debounce() {
   const [searchtext, setSearchText] = React.useState();
@@ -14,7 +13,7 @@ export default function Debounce() {
         onChange={(e) =>
           setTimeout(() => {
             setSearchText(e.target.value);
-          }, 2000)
+          }, 1000)
         }
       />
       <br />

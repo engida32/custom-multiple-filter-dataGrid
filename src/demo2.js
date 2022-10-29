@@ -4,6 +4,10 @@ import {
   GridCloseIcon,
   GridLinkOperator,
   GridToolbar,
+  GridToolbarColumnsButton,
+  GridToolbarContainer,
+  GridToolbarDensitySelector,
+  GridToolbarFilterButton,
 } from "@mui/x-data-grid";
 import { useDemoData } from "@mui/x-data-grid-generator";
 import {
@@ -18,6 +22,7 @@ import {
 } from "@mui/material";
 import { useFieldArray, useForm } from "react-hook-form";
 import { GridFilterPanel } from "@mui/x-data-grid";
+import { Add, Clear, FileDownload, Search } from "@mui/icons-material";
 
 const VISIBLE_FIELDS = ["name", "rating", "country", "dateCreated", "isAdmin"];
 
@@ -29,7 +34,14 @@ const CFilterPanel = ({ columns, operatorValues, handleChange }) => {
     control,
   } = useForm({
     defaultValues: {
-      filter: [{ column: "", operatorValue: "", searchValue: "" }],
+      filter: [
+        {
+          colOperator: null,
+          column: "",
+          operatorValue: "",
+          searchValue: "",
+        },
+      ],
     },
   });
   const { fields, append, remove } = useFieldArray({
@@ -43,6 +55,7 @@ const CFilterPanel = ({ columns, operatorValues, handleChange }) => {
         mx: 1,
         display: "flex",
         flexDirection: "column",
+        alignItems: "center",
         py: 3,
         minWidth: "600px",
       }}
@@ -61,6 +74,7 @@ const CFilterPanel = ({ columns, operatorValues, handleChange }) => {
               // mx: 1,
               display: "flex",
               alignItems: "center",
+              width: "100%",
             }}
           >
             <IconButton size="small" onClick={() => remove(index)}>
@@ -73,6 +87,32 @@ const CFilterPanel = ({ columns, operatorValues, handleChange }) => {
                 fontSize="medium"
               />
             </IconButton>
+            {index > 0 && (
+              <FormControl
+                fullWidth
+                sx={{
+                  mx: 1,
+
+                  width: "20%",
+                  justifyContent: "center",
+                }}
+              >
+                <Select
+                  defaultValue={"OR"}
+                  variant="outlined"
+                  labelId="demo-simple-select-label"
+                  id="demo-simple-select"
+                  {...register(`filter.${index}.colOperator`)}
+                  sx={{
+                    border: 1,
+                    px: 0,
+                  }}
+                >
+                  <MenuItem value={"or"}>OR</MenuItem>
+                  <MenuItem value={"or"}>AND</MenuItem>
+                </Select>
+              </FormControl>
+            )}
             <FormControl
               fullWidth
               sx={{
@@ -147,7 +187,112 @@ const CFilterPanel = ({ columns, operatorValues, handleChange }) => {
     </Box>
   );
 };
-export default function CustomFilterPanelContent2() {
+
+function QuickSearchToolbar(props, { setFilterButtonEl }) {
+  // React.useEffect(() => {
+  //   if (data) {
+  //     console.log({ data });
+  //   }
+  // }, [data]);
+
+  return (
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "space-between",
+        alignItems: "center",
+        color: "#000000",
+        mx: 1,
+        py: 4,
+        borderBottom: 3,
+        borderColor: "#E8E8E8",
+      }}
+    >
+      <Box>
+        <TextField
+          variant="outlined"
+          value={props.value}
+          onChange={props.onChange}
+          placeholder="Search"
+          // size="small"
+          sx={{
+            backgroundColor: "#EFEFEF",
+            width: "700px",
+          }}
+          InputProps={{
+            startAdornment: <Search fontSize="small" sx={{ mr: 1 }} />,
+            endAdornment: (
+              <IconButton
+                title="Clear"
+                aria-label="Clear"
+                size="small"
+                style={{ visibility: props.value ? "visible" : "hidden" }}
+                onClick={props.clearSearch}
+              >
+                <Clear fontSize="small" />
+              </IconButton>
+            ),
+          }}
+        />
+      </Box>
+      <Box
+        sx={{
+          display: "flex",
+        }}
+      >
+        <GridToolbarContainer>
+          <GridToolbarColumnsButton sx={{ mx: 1, width: "100px" }} />
+          <GridToolbarContainer sx={{ mx: 2, p: 0 }}>
+            <GridToolbarFilterButton />
+          </GridToolbarContainer>{" "}
+          <GridToolbarDensitySelector sx={{ mr: 1 }} />
+          {/* <GridToolbarExport sx={{ mr: 1 }} /> */}
+          <Button size="small" startIcon={<FileDownload />} sx={{ mr: 1 }}>
+            {/* <CSVLink
+              data={data?.data?.data || []}
+              asyncOnClick={true}y
+              style={{ textDecoration: "inherit", color: "inherit" }}
+              filename={"Merchant Portal.csv"}
+              onClick={(event, done) => {
+                console.log({ event, done });
+                refetch();
+                if (data) {
+                  done();
+                } else {
+                  done(false);
+                  alert("Please Click again!");
+                }
+              }}
+            >
+              EXPORT
+            </CSVLink> */}
+            Export
+          </Button>
+        </GridToolbarContainer>
+
+        {/* <GridToolbar /> */}
+        <Button
+          sx={{
+            mx: 2,
+            bgcolor: "#FFDC00",
+            color: "white",
+            boxShadow: 2,
+            p: 1.3,
+            " :hover": {
+              bgcolor: "#FFDC00",
+              color: "white",
+            },
+          }}
+          onClick={props.add}
+          // startIcon={<Add />}
+        >
+          Add corporate
+        </Button>
+      </Box>
+    </Box>
+  );
+}
+export default function DashboardWithCustomFilterPanel() {
   const [filterValues, setFilter] = React.useState([]);
 
   console.log("from data grid", filterValues);
@@ -156,17 +301,25 @@ export default function CustomFilterPanelContent2() {
     visibleFields: VISIBLE_FIELDS,
     rowLength: 100,
   });
-
+  console.log("first", GridLinkOperator);
+  let filterModel = {
+    items: filterValues,
+    quickFilterLogicOperator: GridLinkOperator.Or,
+  };
+  console.log(filterModel);
   return (
     <div style={{ height: 400, width: "100%" }}>
       <DataGrid
+        sx={{ mx: 4, mt: 3, color: "#000" }}
         {...data}
         filterModel={{
           items: filterValues,
+          quickFilterLogicOperator: GridLinkOperator.Or,
         }}
         components={{
-          Toolbar: GridToolbar,
+          Toolbar: QuickSearchToolbar,
           // Use custom FilterPanel only for deep modification
+
           FilterPanel: CFilterPanel,
         }}
         componentsProps={{
@@ -184,7 +337,10 @@ export default function CustomFilterPanelContent2() {
             handleChange: setFilter,
             // Force usage of "And" operator
             linkOperators: [GridLinkOperator.And],
-            // Display columns by ascending alphabetical order
+          },
+          panel: {
+            // anchorEl: filterButtonEl,
+            placement: "bottom-end",
           },
         }}
       />
