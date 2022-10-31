@@ -26,7 +26,13 @@ import { Add, Clear, FileDownload, Search } from "@mui/icons-material";
 
 const VISIBLE_FIELDS = ["name", "rating", "country", "dateCreated", "isAdmin"];
 
-const CFilterPanel = ({ columns, operatorValues, handleChange }) => {
+const CFilterPanel = ({
+  columns,
+  operatorValues,
+  handleChange,
+  setColOperator,
+  colOperator,
+}) => {
   const {
     register,
     formState: { errors },
@@ -36,7 +42,7 @@ const CFilterPanel = ({ columns, operatorValues, handleChange }) => {
     defaultValues: {
       filter: [
         {
-          colOperator: null,
+          // colOperator: null,
           column: "",
           operatorValue: "",
           searchValue: "",
@@ -48,7 +54,9 @@ const CFilterPanel = ({ columns, operatorValues, handleChange }) => {
     name: "filter",
     control,
   });
-
+  React.useEffect(() => {
+    console.log("from filter panel", colOperator);
+  }, [colOperator]);
   return (
     <Box
       sx={{
@@ -98,18 +106,19 @@ const CFilterPanel = ({ columns, operatorValues, handleChange }) => {
                 }}
               >
                 <Select
-                  defaultValue={"OR"}
+                  defaultValue={colOperator}
+                  disabled={colOperator}
                   variant="outlined"
                   labelId="demo-simple-select-label"
                   id="demo-simple-select"
-                  {...register(`filter.${index}.colOperator`)}
+                  onChange={(e) => setColOperator(e.target.value)}
                   sx={{
                     border: 1,
                     px: 0,
                   }}
                 >
-                  <MenuItem value={"or"}>OR</MenuItem>
-                  <MenuItem value={"or"}>AND</MenuItem>
+                  <MenuItem value={"OR"}>OR</MenuItem>
+                  <MenuItem value={"AND"}>AND</MenuItem>
                 </Select>
               </FormControl>
             )}
@@ -294,6 +303,9 @@ function QuickSearchToolbar(props, { setFilterButtonEl }) {
 }
 export default function DashboardWithCustomFilterPanel() {
   const [filterValues, setFilter] = React.useState([]);
+  const [colOperator, setColOperator] = React.useState("");
+
+  console.log("col operators", colOperator);
 
   console.log("from data grid", filterValues);
   const { data } = useDemoData({
@@ -301,10 +313,9 @@ export default function DashboardWithCustomFilterPanel() {
     visibleFields: VISIBLE_FIELDS,
     rowLength: 100,
   });
-  console.log("first", GridLinkOperator);
   let filterModel = {
     items: filterValues,
-    quickFilterLogicOperator: GridLinkOperator.Or,
+    quickFilterLogicOperator: colOperator,
   };
   console.log(filterModel);
   return (
@@ -314,12 +325,10 @@ export default function DashboardWithCustomFilterPanel() {
         {...data}
         filterModel={{
           items: filterValues,
-          quickFilterLogicOperator: GridLinkOperator.Or,
+          quickFilterLogicOperator: colOperator,
         }}
         components={{
           Toolbar: QuickSearchToolbar,
-          // Use custom FilterPanel only for deep modification
-
           FilterPanel: CFilterPanel,
         }}
         componentsProps={{
@@ -335,8 +344,10 @@ export default function DashboardWithCustomFilterPanel() {
             ],
             filter: filterValues,
             handleChange: setFilter,
+            setColOperator: setColOperator,
+            colOperator: colOperator,
             // Force usage of "And" operator
-            linkOperators: [GridLinkOperator.And],
+            linkOperators: [colOperator],
           },
           panel: {
             // anchorEl: filterButtonEl,
