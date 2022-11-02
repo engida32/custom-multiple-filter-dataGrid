@@ -21,8 +21,7 @@ import {
   Button,
 } from "@mui/material";
 import { useFieldArray, useForm } from "react-hook-form";
-import { GridFilterPanel } from "@mui/x-data-grid";
-import { Add, Clear, FileDownload, Search } from "@mui/icons-material";
+import { Clear, FileDownload, Search } from "@mui/icons-material";
 
 const VISIBLE_FIELDS = ["name", "rating", "country", "dateCreated", "isAdmin"];
 
@@ -42,7 +41,6 @@ const CFilterPanel = ({
     defaultValues: {
       filter: [
         {
-          // colOperator: null,
           column: "",
           operatorValue: "",
           searchValue: "",
@@ -50,13 +48,12 @@ const CFilterPanel = ({
       ],
     },
   });
+  const [type, setType] = React.useState("text");
   const { fields, append, remove } = useFieldArray({
     name: "filter",
     control,
   });
-  React.useEffect(() => {
-    console.log("from filter panel", colOperator);
-  }, [colOperator]);
+
   return (
     <Box
       sx={{
@@ -111,11 +108,12 @@ const CFilterPanel = ({
                   variant="outlined"
                   labelId="demo-simple-select-label"
                   id="demo-simple-select"
-                  onChange={(e) => setColOperator(e.target.value)}
                   sx={{
                     border: 1,
                     px: 0,
                   }}
+                  onChange={(e) => setColOperator(e.target.value)}
+                  ssss
                 >
                   <MenuItem value={"OR"}>OR</MenuItem>
                   <MenuItem value={"AND"}>AND</MenuItem>
@@ -134,6 +132,15 @@ const CFilterPanel = ({
               <Select
                 {...register(`filter.${index}.column`)}
                 id="demo-simple-select"
+                onChange={(e) => {
+                  console.log("field?.column", field);
+                  if (e.target.value === "dateCreated") {
+                    setType("date");
+                  } else {
+                    setType("text");
+                  }
+                }}
+                // onChange={() => setType("date")}
               >
                 {columns.map((item, index) => {
                   return (
@@ -173,6 +180,7 @@ const CFilterPanel = ({
             </FormControl>
 
             <TextField
+              type={type}
               sx={{
                 mx: 1,
               }}
@@ -215,9 +223,15 @@ function QuickSearchToolbar(props, { setFilterButtonEl }) {
         py: 4,
         borderBottom: 3,
         borderColor: "#E8E8E8",
+        width: "100%",
       }}
     >
-      <Box>
+      <Box
+        sx={{
+          // backgroundColor: "#EFEFEF",
+          width: "50%",
+        }}
+      >
         <TextField
           variant="outlined"
           value={props.value}
@@ -226,7 +240,7 @@ function QuickSearchToolbar(props, { setFilterButtonEl }) {
           // size="small"
           sx={{
             backgroundColor: "#EFEFEF",
-            width: "700px",
+            width: "100%",
           }}
           InputProps={{
             startAdornment: <Search fontSize="small" sx={{ mr: 1 }} />,
