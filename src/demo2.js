@@ -364,8 +364,7 @@ export default function DashboardWithCustomFilterPanel() {
             linkOperators: [colOperator],
           },
           panel: {
-            // anchorEl: filterButtonEl,
-            placement: "bottom-end",
+             placement: "bottom-end",
           },
         }}
       />

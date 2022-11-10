@@ -50,7 +50,7 @@ const initialState = {
 const CFilterPanel = ({ fields, operatorValue, filter, handleChange }) => {
   React.useEffect(() => {
     console.log("filer", filter);
-  }, [JSON.stringify(filter), fields]);
+  }, [JSON.stringify(filter), fields]); 
   return (
     <Box
       sx={{
